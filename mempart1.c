@@ -62,3 +62,7 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+#    compile and run (I havent tested yet but that's what I've got)
+#    gcc -o mempart1 mempart1.c
+#    ./mempart1 part1sequence
