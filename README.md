@@ -1,3 +1,0 @@
-# memoryTranslation
-
-Lets gooooo
