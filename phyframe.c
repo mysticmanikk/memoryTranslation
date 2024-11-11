@@ -1,39 +1,30 @@
-// phyframe.c
-#include "memory.h"
 #include <stdio.h>
+#include <stdint.h>
 
-void initialize_physical_frames(PhysicalFrames *pf) {
-    for (int i = 0; i < NUM_FRAMES; i++) {
-        pf->frame_to_page[i] = -1; // -1 indicates the frame is free
-        pf->last_used[i] = -1;     // For LRU, -1 means never used
-    }
-    pf->next_free_frame = 1; // Start allocating frames from 1 (0 is reserved for OS)
-}
+#define TOTAL_FRAMES 256  // Number of physical frames (change as necessary)
 
-int allocate_frame(PhysicalFrames *pf, int page_num) {
-    // If there's a free frame, allocate it
-    if (pf->next_free_frame < NUM_FRAMES) {
-        int frame = pf->next_free_frame++;
-        pf->frame_to_page[frame] = page_num;
-        return frame;
-    } else {
-        // No free frames; use LRU replacement
-        return lru_replace(pf);
+static int frames[TOTAL_FRAMES];  // Array to represent the physical frames.
+static int free_frame_index = 1;  // Start allocation from frame 1.
+
+void init_frames() {
+    // Initialize all frames to be "free" (value 0).
+    for (int i = 0; i < TOTAL_FRAMES; i++) {
+        frames[i] = 0;
     }
 }
 
-void update_page_usage(PhysicalFrames *pf, int frame_num, int access_time) {
-    pf->last_used[frame_num] = access_time; // Update last used time
+int allocate_frame() {
+    // Allocate the next available frame.
+    if (free_frame_index < TOTAL_FRAMES) {
+        frames[free_frame_index] = 1;  // Mark as allocated
+        return free_frame_index++;
+    }
+    return -1;  // No free frames available
 }
 
-int lru_replace(PhysicalFrames *pf) {
-    // Find the least recently used frame
-    int lru_frame = -1, oldest_time = __INT_MAX__;
-    for (int i = 1; i < NUM_FRAMES; i++) { // Start from 1, skipping frame 0
-        if (pf->last_used[i] < oldest_time) {
-            oldest_time = pf->last_used[i];
-            lru_frame = i;
-        }
+void free_frame(int frame) {
+    // Free a specific physical frame.
+    if (frame >= 1 && frame < TOTAL_FRAMES) {
+        frames[frame] = 0;
     }
-    return lru_frame;
 }
