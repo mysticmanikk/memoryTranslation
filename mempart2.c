@@ -1,47 +1,59 @@
-// mempart2.c
-#include "memory.h"
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <time.h>
+#include "pagetable.h"
+#include "phyframe.h"
+
+#define OUTPUT_FILE_NAME "part2out"
+
+// Function to analyze the access sequence and translate virtual addresses to physical addresses
+void analyze_access_sequence(const char *input_file) {
+    uint64_t virtual_address;
+    FILE *content = fopen(input_file, "rb");
+    FILE *fout = fopen(OUTPUT_FILE_NAME, "w");
+
+    if (!content || !fout) {
+        printf("Error opening file\n");
+        return;
+    }
+
+    // Read each virtual address from the input file
+    while (fread(&virtual_address, sizeof(virtual_address), 1, content) == 1) {
+        // Translate the virtual address to the corresponding physical frame
+        int physical_frame = translate_virtual_address(virtual_address);
+
+        // Translate the physical address (preserving the page bits)
+        uint64_t physical_address = (virtual_address & 0xFFFFFFFFFFFFF000) | physical_frame;
+
+        // Write the translated physical address to the output file in the required format
+        fprintf(fout, "0x%016lx\n", physical_address);
+    }
+
+    fclose(content);  // Close the input file
+    fclose(fout);     // Close the output file
+}
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
-        fprintf(stderr, "Usage: %s <input filename>\n", argv[0]);
+        printf("Usage: %s <input_file_name>\n", argv[0]);
         return 1;
     }
 
-    FILE *input_file = fopen(argv[1], "rb");
-    if (input_file == NULL) {
-        perror("Error opening input file");
-        return 1;
-    }
+    const char *input_file_name = argv[1];
 
-    FILE *output_file = fopen("part2out", "w");
-    if (output_file == NULL) {
-        perror("Error creating output file");
-        fclose(input_file);
-        return 1;
-    }
+    // Initialize frames and page table
+    init_frames();
+    init_page_table();
 
-    PageTable pt;
-    PhysicalFrames pf;
-    initialize_page_table(&pt);
-    initialize_physical_frames(&pf);
+    // Analyze the access sequence from the input file
+    analyze_access_sequence(input_file_name);
 
-    unsigned long virtual_address;
-    int page_fault_count = 0, access_time = 0;
+    // Output the number of page faults
+    printf("Page faults: %d\n", page_faults);
 
-    while (fread(&virtual_address, sizeof(unsigned long), 1, input_file) == 1) {
-        unsigned long physical_address = translate_address(&pt, &pf, virtual_address, &page_fault_count, access_time);
-        fprintf(output_file, "0x%04lX\n", physical_address);
-        access_time++;
-    }
-
-    fclose(input_file);
-    fclose(output_file);
-
-    FILE *result_file = fopen("p2result.txt", "w");
-    fprintf(result_file, "Page Faults: %d\n", page_fault_count);
-    fclose(result_file);
+    // Generate and store the MD5 checksum of the output file (part2out)
+    system("md5sum part2out > p2result.txt");
 
     return 0;
 }
