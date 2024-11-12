@@ -1,30 +1,30 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#define TOTAL_FRAMES 256  // Number of physical frames (change as necessary)
+#define FRAMES 256  // physical frames
 
-static int frames[TOTAL_FRAMES];  // Array to represent the physical frames.
-static int free_frame_index = 1;  // Start allocation from frame 1.
+ int frames[FRAMES];  // Array representing physical frames (1 for allocated, 0 for free)
+int free_frame_index = 1;  // Start allocating from frame 1 (frame 0 is reserved for OS)
 
 void init_frames() {
-    // Initialize all frames to be "free" (value 0).
-    for (int i = 0; i < TOTAL_FRAMES; i++) {
+    // Initialize frames to be free (value 0)
+    for (int i = 0; i < FRAMES; i++) {
         frames[i] = 0;
     }
 }
 
 int allocate_frame() {
-    // Allocate the next available frame.
-    if (free_frame_index < TOTAL_FRAMES) {
-        frames[free_frame_index] = 1;  // Mark as allocated
-        return free_frame_index++;
+    // Allocate the next available frame
+    if (free_frame_index < FRAMES) {
+        frames[free_frame_index] = 1;  // Mark the frame as allocated
+        return free_frame_index++;  // Return the frame and increment the index
     }
     return -1;  // No free frames available
 }
 
 void free_frame(int frame) {
-    // Free a specific physical frame.
-    if (frame >= 1 && frame < TOTAL_FRAMES) {
-        frames[frame] = 0;
+    // Free the allocated frame
+    if (frame >= 1 && frame < FRAMES) {
+        frames[frame] = 0;  // Mark the frame as free
     }
 }
