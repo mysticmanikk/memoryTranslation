@@ -1,30 +1,27 @@
 #include <stdio.h>
-#include <stdint.h>
+#include "phyframe.h"
 
-#define FRAMES 256  // physical frames
+#define FRAMES 8
 
- int frames[FRAMES];  // Array representing physical frames (1 for allocated, 0 for free)
-int free_frame_index = 1;  // Start allocating from frame 1 (frame 0 is reserved for OS)
+int frames[FRAMES] = {0};
+int next_free_frame = 1;
 
 void init_frames() {
-    // Initialize frames to be free (value 0)
-    for (int i = 0; i < FRAMES; i++) {
+    for (int i = 1; i < FRAMES; i++) {
         frames[i] = 0;
     }
 }
 
 int allocate_frame() {
-    // Allocate the next available frame
-    if (free_frame_index < FRAMES) {
-        frames[free_frame_index] = 1;  // Mark the frame as allocated
-        return free_frame_index++;  // Return the frame and increment the index
+    if (next_free_frame < FRAMES) {
+        frames[next_free_frame] = 1;
+        return next_free_frame++;
     }
-    return -1;  // No free frames available
+    return -1;
 }
 
 void free_frame(int frame) {
-    // Free the allocated frame
-    if (frame >= 1 && frame < FRAMES) {
-        frames[frame] = 0;  // Mark the frame as free
+    if (frame > 0 && frame < FRAMES) {
+        frames[frame] = 0;
     }
 }
