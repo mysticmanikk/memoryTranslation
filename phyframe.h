@@ -3,7 +3,7 @@
 #ifndef PHYFRAME_H
 #define PHYFRAME_H
 
-#define TOTAL_FRAMES 256  // Total number of physical frames
+#define FRAMES 8  // physical frames
 
 // Function to initialize physical frames (mark all frames as free).
 void init_frames();
