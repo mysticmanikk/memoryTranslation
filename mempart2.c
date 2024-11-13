@@ -21,6 +21,8 @@ void analyze_access_sequence(const char *input_file) {
         int physical_frame = translate_virtual_address(virtual_address);
         uint64_t physical_address = (physical_frame << 12) | (virtual_address & 0xFFF);
         fprintf(fout, "0x%016lx\n", physical_address);
+        
+
     }
 
     fclose(content);
